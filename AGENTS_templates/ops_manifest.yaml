@@ -1,0 +1,130 @@
+# Ops Manifest Template v3.0
+
+## Purpose
+
+`ops/manifest.yaml` is the startup-ingested runtime map. It should give an agent a concise high-level understanding of the project and point to the next docs to open only when needed.
+
+It is not a README, file inventory, architecture essay, domain glossary, or backlog.
+
+## Constraints
+
+- Startup-ingested: compact and factual.
+- Target ~80 lines, hard max 120.
+- Prefer stable runtime facts over prose.
+- Keep values short. One sentence max per summary or gotcha.
+- Do not duplicate README procedures.
+- Do not list every file in the repo.
+- Required top-level keys: `project`, `read_next`, `entrypoints`, `runtime`, `testing`, `open_on_demand`, `gotchas`.
+- Optional top-level keys: `data`, `integrations`, `deploy`.
+- Maximum counts:
+  - `read_next`: 8
+  - `entrypoints.app`: 4
+  - `entrypoints.workers`: 12
+  - `runtime.services`: 6
+  - `runtime.timers`: 12
+  - `integrations`: 8
+  - `gotchas`: 8
+
+## Content Rules
+
+- `project.summary` answers what this repo does in one sentence.
+- `read_next` maps doc roles to paths. It should include only useful docs.
+- `entrypoints` names the main runtime entry points an agent may affect.
+- `runtime` names services, timers, env files, state paths, and read-only health checks.
+- `testing` names default commands only. Detailed overrides belong in `ops/TESTING.md`.
+- `open_on_demand` lists focused runtime docs only.
+- `gotchas` lists high-signal facts that prevent likely bad decisions.
+
+## Forbidden Content
+
+- Globs, wildcards, or repo file patterns in any `name`.
+- Vague labels such as `various workers`, `misc timers`, or `many scripts`.
+- README-style setup procedures or troubleshooting steps.
+- File inventories that are not operationally relevant.
+- Architecture essays, domain glossaries, or Module design notes.
+- Issue tracker or triage configuration. Use `docs/agents/`.
+- Long prose paragraphs inside YAML values.
+- Read-write commands in `health_checks` or `post_deploy_checks`.
+
+## Template
+
+```yaml
+# DATETIME of last agent review: DD MMM YYYY HH:MM (Europe/London)
+
+project:
+  name: Project Name
+  type: node-api | laravel-web | python-worker | static-site | mixed
+  summary: One sentence describing what this repo does for users or operators.
+
+read_next:
+  testing: ops/TESTING.md
+  runtime: ops/runtime.md
+  domain: CONTEXT.md
+  agent_domain: docs/agents/domain.md
+  active_handover: follow_up.md
+
+entrypoints:
+  app:
+    - path: src/index.ts
+      role: api server
+  workers:
+    - name: worker-name
+      path: src/workers/worker-name.ts
+      trigger: systemd timer every minute
+
+runtime:
+  services:
+    - name: app.service
+      purpose: api
+  timers:
+    - name: app-worker.timer
+      purpose: scheduled worker
+  env_files:
+    - .env
+  state_paths:
+    - storage/logs
+  health_checks:
+    - curl -sS http://127.0.0.1:8080/health
+
+data:
+  stores:
+    - Postgres: app
+  key_runtime_tables:
+    - jobs
+    - settings
+
+integrations:
+  - name: upstream-api.example.com
+    purpose: ingest source
+
+testing:
+  default_commands:
+    - npm test
+    - npm run build
+
+deploy:
+  restart:
+    - sudo systemctl restart app.service
+  post_deploy_checks:
+    - curl -sS http://127.0.0.1:8080/health
+
+open_on_demand:
+  - ops/runtime.md
+  - ops/integrations.md
+  - ops/TESTING.md
+
+gotchas:
+  - Use the pinned runtime version from .tool-versions.
+  - Page loads should use stored state; fresh upstream calls belong in workers.
+```
+
+## Validation Checklist
+
+- [ ] Manifest can be read in under 60 seconds.
+- [ ] Every named service, timer, and entrypoint exists in source or deploy config.
+- [ ] `read_next` paths exist or are intentionally planned for creation.
+- [ ] `health_checks` and `post_deploy_checks` are read-only.
+- [ ] Mutating commands appear only under clearly mutating keys such as `deploy.restart`.
+- [ ] No command duplicates a long README procedure.
+- [ ] Each gotcha prevents a likely bad decision.
+- [ ] Domain language and architecture decisions are absent; they belong in `CONTEXT.md` and ADRs.
