@@ -1,23 +1,23 @@
 # Active Validation
 
-## Feature: WoW 3.3.5a countdown compatibility fix
+## Feature: Immediate idle pause
 
 - Status: Validating
 - Target env: local ChromieCraft WoW 3.3.5a client
 - Created: 16 Aug 2026
 - Last touched: 16 Aug 2026
-- Last validation run: 16 Aug 2026 (automated harness only)
+- Last validation run: 16 Aug 2026 (automated harness passed)
 
 ### Problem
 
-- `math.mod` is absent in the real client, so countdown formatting throws at login and repeatedly from `OnUpdate`.
-- The visible timer remains frozen and repeated errors plausibly account for the reported FPS loss.
+- The timer continued counting for 15 seconds after movement or combat stopped.
+- The activity tail is no longer wanted; idle time must stop the countdown immediately.
 
 ### Implementation
 
-- Use Lua's `%` operator for countdown and duration remainders.
-- Remove the test-only `math.mod` compatibility shim that concealed the client failure.
-- Exercise whole-hour duration formatting through the settings Interface.
+- Count down only while movement or combat is detected.
+- Remove activity-tail state, unrelated activity events, and their registrations.
+- Update the settings description and runtime documentation.
 
 ### Validation Checklist
 
@@ -26,22 +26,17 @@
   - Expect: `111timer behavioural tests passed`
   - Evidence: Passed locally on 16 Aug 2026.
 
-- [ ] Real-client Lua errors and countdown behavior
-  - Command: install the candidate addon, run `/console scriptErrors 1`, then `/reload`; test idle, movement, combat, and 15 seconds after activity.
-  - Expect: no BugSack errors; countdown decreases during movement/combat and the activity tail, then pauses while idle.
+- [ ] Real-client immediate pause
+  - Command: move until the countdown changes, stop moving out of combat, then remain idle for at least 10 seconds.
+  - Expect: the countdown turns grey and does not lose another displayed second after movement stops.
   - Evidence: Pending user verification.
 
-- [ ] Real-client FPS comparison
-  - Command: compare displayed FPS in the same scene for at least 30 seconds with the addon disabled and enabled.
-  - Expect: less than 1 FPS variance and no accumulating BugSack errors.
-  - Evidence: Pending user verification.
-
-- [ ] Reminder and settings regression
-  - Command: expire a short timer in and out of combat; test reminder buttons, `/111timer`, dragging, and `/reload`.
-  - Expect: combat queues/hides the reminder; settings and positions persist; `/reload` starts the nominated default timer.
+- [ ] Combat transition
+  - Command: observe the countdown while entering combat without moving, then leave combat and remain still.
+  - Expect: it counts during combat and pauses immediately when combat ends.
   - Evidence: Pending user verification.
 
 ### Release Gate
 
-- Do not bump the version or tag a release until the real-client checks pass.
-- Remove this section when every validation item is complete.
+- Keep direct pre-stable commit/push testing until the user declares the addon stable.
+- Remove this section when the real-client checks pass.

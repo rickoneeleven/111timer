@@ -1,6 +1,5 @@
 local frames = {}
 local namedFrames = {}
-local now = 0
 local playerSpeed = 0
 local playerInCombat = false
 
@@ -75,7 +74,6 @@ function CreateFrame(kind, name, parent, template)
     return frame
 end
 
-function GetTime() return now end
 function GetUnitSpeed() return playerSpeed end
 function UnitAffectingCombat() return playerInCombat end
 
@@ -104,7 +102,6 @@ local function Advance(eventFrame, seconds, speed)
     playerSpeed = speed or 0
     local index
     for index = 1, seconds do
-        now = now + 1
         eventFrame.scripts.OnUpdate(eventFrame, 1)
     end
 end
@@ -134,10 +131,11 @@ AssertEqual(countdownValue.text, "10:00", "idle time does not count")
 Advance(eventFrame, 5, 7)
 AssertEqual(countdownValue.text, "9:55", "movement counts")
 
-Advance(eventFrame, 15, 0)
-AssertEqual(countdownValue.text, "9:40", "activity tail counts")
+Advance(eventFrame, 1, 0)
+AssertEqual(countdownValue.text, "9:55", "timer pauses as soon as movement stops")
+eventFrame.scripts.OnEvent(eventFrame, "LOOT_OPENED")
 Advance(eventFrame, 5, 0)
-AssertEqual(countdownValue.text, "9:40", "timer pauses after activity tail")
+AssertEqual(countdownValue.text, "9:55", "non-movement activity does not consume timer")
 
 OneElevenTimerDB.durations[2] = 60
 eventFrame.scripts.OnEvent(eventFrame, "PLAYER_LOGIN")

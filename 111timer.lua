@@ -1,7 +1,6 @@
 OneElevenTimer = {}
 
 local ADDON_NAME = "111timer"
-local ACTIVITY_TAIL_SECONDS = 15
 local UPDATE_INTERVAL = 0.10
 local MIN_DURATION_MINUTES = 1
 local MAX_DURATION_MINUTES = 180
@@ -31,7 +30,6 @@ local state = {
     expired = false,
     active = false,
     inCombat = false,
-    lastActivityAt = nil,
     accumulator = 0,
 }
 
@@ -173,10 +171,6 @@ local function IsPlayerInCombat()
     return state.inCombat or (UnitAffectingCombat("player") and true or false)
 end
 
-local function MarkActivity()
-    state.lastActivityAt = GetTime()
-end
-
 local function RefreshCountdown()
     if not countdownFrame or not countdownText then
         return
@@ -229,7 +223,6 @@ local function StartTimer(duration)
     state.remaining = duration
     state.expired = false
     state.active = false
-    state.lastActivityAt = nil
     state.accumulator = 0
     reminderFrame:Hide()
     RefreshCountdown()
@@ -439,7 +432,7 @@ local function CreateSettingsFrame()
     description:SetPoint("TOPLEFT", 28, -51)
     description:SetWidth(330)
     description:SetJustifyH("LEFT")
-    description:SetText("The timer counts while moving or in combat, and for 15 seconds afterwards.")
+    description:SetText("The timer counts while moving or in combat and pauses while idle.")
 
     local durationHeading = settingsFrame:CreateFontString(nil, "OVERLAY", "GameFontNormal")
     durationHeading:SetPoint("TOPLEFT", 32, -84)
@@ -515,22 +508,6 @@ local function CreateUserInterface()
     SetCountdownVisibility()
 end
 
-local ACTIVITY_EVENTS = {
-    UNIT_SPELLCAST_START = true,
-    UNIT_SPELLCAST_SUCCEEDED = true,
-    LOOT_OPENED = true,
-    GOSSIP_SHOW = true,
-    QUEST_GREETING = true,
-    QUEST_DETAIL = true,
-    QUEST_PROGRESS = true,
-    QUEST_COMPLETE = true,
-    MERCHANT_SHOW = true,
-    BANKFRAME_OPENED = true,
-    MAIL_SHOW = true,
-    AUCTION_HOUSE_SHOW = true,
-    TRADE_SHOW = true,
-}
-
 local function OnEvent(_, event, arg1)
     if event == "ADDON_LOADED" then
         if arg1 ~= ADDON_NAME then
@@ -546,19 +523,13 @@ local function OnEvent(_, event, arg1)
         SetCountdownVisibility()
     elseif event == "PLAYER_REGEN_DISABLED" then
         state.inCombat = true
-        MarkActivity()
         if state.expired and reminderFrame:IsShown() then
             reminderFrame:Hide()
         end
     elseif event == "PLAYER_REGEN_ENABLED" then
         state.inCombat = false
-        MarkActivity()
         if state.expired then
             ShowReminder()
-        end
-    elseif ACTIVITY_EVENTS[event] then
-        if string.sub(event, 1, 15) ~= "UNIT_SPELLCAST_" or arg1 == "player" then
-            MarkActivity()
         end
     end
 end
@@ -576,17 +547,10 @@ local function OnUpdate(_, elapsed)
     local step = state.accumulator
     state.accumulator = 0
 
-    local now = GetTime()
     local moving = (GetUnitSpeed("player") or 0) > 0
     local inCombat = IsPlayerInCombat()
 
-    if moving or inCombat then
-        state.lastActivityAt = now
-    end
-
-    state.active = moving
-        or inCombat
-        or (state.lastActivityAt and (now - state.lastActivityAt) <= ACTIVITY_TAIL_SECONDS)
+    state.active = moving or inCombat
 
     if state.active then
         state.remaining = state.remaining - step
@@ -603,19 +567,6 @@ eventFrame:RegisterEvent("ADDON_LOADED")
 eventFrame:RegisterEvent("PLAYER_LOGIN")
 eventFrame:RegisterEvent("PLAYER_REGEN_DISABLED")
 eventFrame:RegisterEvent("PLAYER_REGEN_ENABLED")
-eventFrame:RegisterEvent("UNIT_SPELLCAST_START")
-eventFrame:RegisterEvent("UNIT_SPELLCAST_SUCCEEDED")
-eventFrame:RegisterEvent("LOOT_OPENED")
-eventFrame:RegisterEvent("GOSSIP_SHOW")
-eventFrame:RegisterEvent("QUEST_GREETING")
-eventFrame:RegisterEvent("QUEST_DETAIL")
-eventFrame:RegisterEvent("QUEST_PROGRESS")
-eventFrame:RegisterEvent("QUEST_COMPLETE")
-eventFrame:RegisterEvent("MERCHANT_SHOW")
-eventFrame:RegisterEvent("BANKFRAME_OPENED")
-eventFrame:RegisterEvent("MAIL_SHOW")
-eventFrame:RegisterEvent("AUCTION_HOUSE_SHOW")
-eventFrame:RegisterEvent("TRADE_SHOW")
 eventFrame:SetScript("OnEvent", OnEvent)
 eventFrame:SetScript("OnUpdate", OnUpdate)
 

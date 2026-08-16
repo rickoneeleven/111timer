@@ -22,7 +22,7 @@ Restart World of Warcraft or run `/reload`. Use `/111timer` or right-click the c
 
 ## Use
 
-- The countdown runs while the character is moving or in combat and for 15 seconds after recognised activity.
+- The countdown runs only while the character is moving or in combat and pauses as soon as both stop.
 - White text means the timer is running, grey means it is idle, and orange means a reminder is due.
 - Drag the countdown or reminder to reposition it.
 - Choose one of the three reminder durations when the **Check tasks** window appears.
@@ -38,7 +38,7 @@ Run the behavioural harness from the repository root:
 npx --yes --package=fengari-node-cli fengari tests/test.lua
 ```
 
-The harness simulates the WoW API and verifies login reset, idle pausing, movement, the activity tail, combat queuing, reminder buttons, and settings persistence.
+The harness simulates the WoW API and verifies login reset, immediate idle pausing, movement, combat queuing, reminder buttons, and settings persistence.
 
 ## Licence
 

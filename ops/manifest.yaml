@@ -39,6 +39,6 @@ open_on_demand:
 
 gotchas:
   - Timer progress is session-only and resets to the configured default on PLAYER_LOGIN.
-  - Idle time does not count after the 15-second activity tail expires.
+  - The timer pauses as soon as the character is neither moving nor in combat.
   - Reminders are hidden or deferred during combat and shown after combat ends.
   - The repository must be installed as a folder named 111timer for ADDON_LOADED handling.
