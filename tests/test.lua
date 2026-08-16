@@ -1,5 +1,3 @@
-math.mod = math.mod or math.fmod
-
 local frames = {}
 local namedFrames = {}
 local now = 0
@@ -186,16 +184,17 @@ end
 
 settingsEdits[1]:SetText("6")
 settingsEdits[2]:SetText("12")
-settingsEdits[3]:SetText("25")
+settingsEdits[3]:SetText("120")
 settingsChecks[1].scripts.OnClick()
 settingsChecks[4]:SetChecked(false)
 applyButton.scripts.OnClick()
 
 AssertEqual(OneElevenTimerDB.durations[1], 360, "settings save first duration")
 AssertEqual(OneElevenTimerDB.durations[2], 720, "settings save second duration")
-AssertEqual(OneElevenTimerDB.durations[3], 1500, "settings save third duration")
+AssertEqual(OneElevenTimerDB.durations[3], 7200, "settings save third duration")
 AssertEqual(OneElevenTimerDB.defaultIndex, 1, "settings save nominated default")
 AssertEqual(countdown.shown, false, "settings hide optional countdown")
+AssertEqual(reminder.durationButtons[3].text, "2 hours", "whole-hour duration label")
 
 eventFrame.scripts.OnEvent(eventFrame, "PLAYER_LOGIN")
 AssertEqual(countdownValue.text, "6:00", "login uses configured default")

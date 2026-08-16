@@ -149,8 +149,8 @@ local function FormatDuration(seconds)
 
     if minutes == 60 then
         return "1 hour"
-    elseif minutes > 60 and math.mod(minutes, 60) == 0 then
-        return (minutes / 60) .. " hours"
+    elseif minutes > 60 and minutes % 60 == 0 then
+        return string.format("%d hours", minutes / 60)
     end
 
     return minutes .. " min"
@@ -159,8 +159,8 @@ end
 local function FormatCountdown(seconds)
     local total = math.max(0, math.ceil(seconds))
     local hours = math.floor(total / 3600)
-    local minutes = math.floor(math.mod(total, 3600) / 60)
-    local remainingSeconds = math.mod(total, 60)
+    local minutes = math.floor((total % 3600) / 60)
+    local remainingSeconds = total % 60
 
     if hours > 0 then
         return string.format("%d:%02d:%02d", hours, minutes, remainingSeconds)
