@@ -1,6 +1,6 @@
 # Agent Domain Docs
 
-DATETIME of last agent review: 16 Aug 2026 15:51 (Europe/London)
+DATETIME of last agent review: 16 Aug 2026 16:29 (Europe/London)
 
 ## Layout
 
@@ -8,12 +8,14 @@ DATETIME of last agent review: 16 Aug 2026 15:51 (Europe/London)
 - Domain context: create `CONTEXT.md` only when non-trivial domain or Module design requires it
 - ADR directory: create `docs/adr/` entries only for durable accepted or rejected decisions
 - Runtime docs: `ops/`
+- Release versioning: `docs/agents/release-versioning.md`
 - Short-lived handover: `follow_up.md` when present
 - Issue tracker and triage config: not configured
 
 ## Read Rules
 
 - At startup, read this file plus `ops/manifest.yaml` and `ops/TESTING.md`.
+- Before committing any repository change, read and apply `docs/agents/release-versioning.md`.
 - Before non-trivial domain or Module design, read `CONTEXT.md` when present.
 - Read only ADRs relevant to the touched area.
 - Read `follow_up.md` when present and relevant to active validation work.
