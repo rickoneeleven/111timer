@@ -1,0 +1,8 @@
+## Interface: 30300
+## Title: 111 Timer
+## Notes: Active-play task reminders for Wrath of the Lich King 3.3.5a.
+## Author: rickoneeleven
+## Version: 1.0.0
+## SavedVariables: OneElevenTimerDB
+
+111timer.lua
